@@ -23,7 +23,7 @@ Router.post('/signup',async(req,res)=>{
 
         })
        }
-       
+
 
        const hashCode = await bcrypt.hash(req.body.password,10,)
        const uploadedImage = await cloudinary.uploader.upload(req.files.logo.tempFilePath,)
@@ -49,6 +49,30 @@ Router.post('/signup',async(req,res)=>{
         console.log(err)
         res.status(500).json({error:err})        
     }
+})
+
+Router.post('/login',async(req,res)=>{
+    
+        try 
+        {
+            console.log(req.body)
+            const users = await User.find({email:req.body.email})
+            console.log(users)
+            if(users.length==0)
+            {
+                return res.status(500).json({
+                    error:'User with this email does not exists'
+    
+                })
+            }
+        } 
+        catch (err) 
+        {
+            console.log(err)
+            res.status(500).json({
+                error:'Something went wrong'
+            })
+        }
 })
 
 module.exports = Router
