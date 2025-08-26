@@ -58,7 +58,7 @@ Router.post('/login',async(req,res)=>{
         {
             //console.log(req.body)
             const users = await User.find({email:req.body.email})
-            console.log(users)
+            //console.log(users)
             if(users.length==0)
             {
                 return res.status(500).json({
@@ -68,7 +68,7 @@ Router.post('/login',async(req,res)=>{
             }
             
            const isValid = await bcrypt.compare(req.body.password,users[0].password)
-           console.log(isValid)
+           //console.log(isValid)
            if(!isValid)
            {
             return res.status(500).json({
