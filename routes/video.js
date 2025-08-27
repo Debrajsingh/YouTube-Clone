@@ -121,4 +121,41 @@ Router.put('/:videoId',checkAuth,async(req,res)=>{
     }
 });
 
+
+// delete video
+Router.delete('/:videoId',checkAuth,async(req,res)=>{
+
+
+    try{
+
+        const verifiedUser = await jwt.verify(req.headers.authorization.split(' ')[1], 'Liza loves Debraj'); 
+        console.log(verifiedUser);
+        const video = await Video.findById(req.params.videoId)
+        if(video.user_id == verifiedUser._id)
+        {
+            //delete video ,thumbnail and data from db
+            await cloudinary.uploader.destroy(video.videoId,{resource_type: "video"});
+            await cloudinary.uploader.destroy(video.thumbnailId)
+            const deletedResponse = await Video.findByIdAndDelete(req.params.videoId)
+            res.status(200).json({
+                message:'Video deleted successfully',
+                deletedResponse:deletedResponse
+            })
+
+        }
+        else
+        {
+            return res.status(500).json({
+                error:'You are not authorized to delete this video'
+            });
+        }
+
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(500).json({error:err});
+    }
+})
+
 module.exports = Router;
