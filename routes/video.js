@@ -157,5 +157,83 @@ Router.delete('/:videoId',checkAuth,async(req,res)=>{
         res.status(500).json({error:err});
     }
 })
+//like api
+Router.put('/like/:videoId',checkAuth,async(req,res)=>{
+    try
+    {
+        const verifiedUser = await jwt.verify(req.headers.authorization.split(' ')[1], 'Liza loves Debraj'); 
+        console.log(verifiedUser);
+        const video = await Video.findById(req.params.videoId)
+        console.log(video);
+        if(video.likedBy.includes(verifiedUser._id))
+        {
+            return res.status(500).json({
+                error:'You have already liked this video'
+            });
+        }
+
+        if(video.dislikedBy.includes(verifiedUser._id))
+        {
+            video.dislike -= 1;
+            video.dislikedBy = video.dislikedBy.filter(userId => userId.toString() !== verifiedUser._id);
+        }
+
+
+        video.likes += 1;
+        video.likedBy.push(verifiedUser._id);
+        await video.save();
+
+        res.status(200).json({
+            message:'Video liked',
+            
+        });
+
+
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(500).json({error:err});
+    }
+});
+
+
+//dislike api
+Router.put('/dislike/:videoId',checkAuth,async(req,res)=>{
+    try
+    {
+        const verifiedUser = await jwt.verify(req.headers.authorization.split(' ')[1], 'Liza loves Debraj'); 
+        console.log(verifiedUser);
+        const video = await Video.findById(req.params.videoId)
+        console.log(video);
+        if(video.dislikedBy.includes(verifiedUser._id))
+        {
+            return res.status(500).json({
+                error:'You have already disliked this video'
+            });
+        }
+        if(video.likedBy.includes(verifiedUser._id))
+        {
+            video.likes -= 1;
+            video.likedBy = video.likedBy.filter(userId => userId.toString() !== verifiedUser._id);
+        }
+
+        video.dislike += 1;
+        video.dislikedBy.push(verifiedUser._id);
+        await video.save();
+
+        res.status(200).json({
+            message:'Video disliked',
+            
+        });
+
+
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(500).json({error:err});
+    }
+});
 
 module.exports = Router;
