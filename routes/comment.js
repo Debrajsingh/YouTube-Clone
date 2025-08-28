@@ -114,5 +114,63 @@ Router.put('/dislike/:commentId',checkAuth,async(req,res)=>{
     }
 });
 
+//update comment api
+Router.put('/:commentId',checkAuth,async(req,res)=>{
+    try
+    {
+        const verifiedUser = await jwt.verify(req.headers.authorization.split(' ')[1], 'Liza loves Debraj'); 
+        console.log(verifiedUser);
+
+        const comment = await Comment.findById(req.params.commentId)
+        console.log(comment);
+        if(comment.userId.toString() !== verifiedUser._id)
+        {
+            return res.status(500).json({
+                error:'You are not authorized to update this comment'
+            });
+        }
+
+        comment.commentText = req.body.commentText;
+        const updatedComment = await comment.save();
+        res.status(200).json({
+            updatedComment:updatedComment
+        });
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(500).json({error:err});
+    }
+});
+
+//delete comment api
+Router.delete('/:commentId',checkAuth,async(req,res)=>{
+    try
+    {
+        const verifiedUser = await jwt.verify(req.headers.authorization.split(' ')[1], 'Liza loves Debraj'); 
+        console.log(verifiedUser);
+
+        const comment = await Comment.findById(req.params.commentId)
+        console.log(comment);
+        if(comment.userId != verifiedUser._id)
+        {
+            return res.status(500).json({
+                error:'You are not authorized to delete this comment'
+            });
+        }
+
+        await Comment.findByIdAndDelete(req.params.commentId);
+        res.status(200).json({
+            deletedData:'Comment deleted successfully'
+        });
+       
+
+    }
+    catch(err)
+    {
+        console.log(err);
+        res.status(500).json({error:err});
+    }
+})
 
 module.exports = Router;
